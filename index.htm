@@ -2,73 +2,496 @@
 <html>
 <head>
 <title>JSON 2 HTML</title>
-<link rel="StyleSheet" type="text/css" href="style.css" />
-<script type="text/javascript" src="scripts/json-min.js"></script>
-<script type="text/javascript" src="scripts/BubbleTooltips.js"></script>
-<script type="text/javascript" src="scripts/parse.js"></script>
-<!--[if lt IE 7]>
-<script defer type="text/javascript" src="scripts/pngfix.js"></script>
-<![endif]-->
+<style>
+	body { min-height: 100%; font-family: Verdana, "Trebuchet MS", Helvicita, Arial, sans-serif; font-size: 95%;
+	 background-color: #ffffff; color: #000000; padding: 0px; margin: 0px; margin-bottom: 10px; }
+	hr { border: none; height: 1px; background-color: #808080; }
+	form { padding: 0px; margin: 0px; }
 
-<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+	.header { text-align: center; padding-top: 17px; height: 90px;
+	 background: url(images/top1.png) repeat-x; }
+	.bodywrap { background-color: #000000; display: none; position: absolute; top: 0px; left: 0px; z-index: 99; }
+
+	.shoutboxcon { float: right; margin-top: 25px; margin-right: 17px; padding-bottom: 10px; z-index: 5;
+	  color: #000000; padding: 5px; background-color: #cccccc; text-align: left; position: absolute; right: 0; }
+
+	.mast { font-size: 105%; }
+	.mast_first { margin-top: 0; }
+	form > .mast { font-size: 110%; }
+	.jsonlogo { float: right; margin-left: 1em; }
+	.mainbody { padding-left: 1em; padding-right: 1em; }
+
+	.footer { background-color: #ffffaa; padding: 3px; }
+
+	img { border: 0px; }
+	wbr:after { content: "\00200B"; }
+	.noa { line-height: 0em; font-size: 0em; }
+	.titled { border-bottom: 1px dashed #000000; }
+
+	.output { margin-top: 1em; margin-bottom: 1em; }
+	.desc { display: none; width: 40%; position: absolute; z-index: 99; padding: 1em; border: 1px solid #000000; background-color: #ffffee; }
+	.closep { text-align: center; margin-bottom: 0px; }
+
+	h3 { margin-top: -0.3em; margin-bottom: 0.5em; font-size: 105%; }
+
+	table { border: 1px solid #000000; border-collapse: collapse; }
+	table td, table th { padding: 0.2em 0.3em; border: 1px solid #000000; vertical-align: top; }
+
+	div.object { padding: 1.5em; border: 1px solid #000000; background-color: #eeeeee; height: 1%; position: relative; }
+	.objecttable { background-color: #ffffff; }
+	div.array { padding: 1.5em; border: 1px solid #000000; background-color: #eeeeff; height: 1%; position: relative; }
+	.arraytable { background-color: #ffffee; }
+
+	.wrap { display: table; margin: 0.3em; }
+
+	.string { color: #000000; }
+	.number { color: #0000ff; }
+	.boolean { color: #ff8000; }
+	.void { color: #0000ff; }
+
+	.widgets { position: absolute; top: 0em; right: 1.5em; width: 40px; height: 40px; }
+
+	.statson { padding: 0.5em; background-color: #ffffff; border: 1px solid #a0a0a0; }
+	#statscon { display: none; }
+	#stats table { border: none; }
+	#stats table tr { border: none; }
+	#stats table td { border: none; }
+
+	.ex { vertical-align: middle; margin-bottom: 1px; margin-top: 1px; }
+
+	.clear { clear: both; }
+	.lfloat { float: left; }
+	.rfloat { float: right; }
+
+
+	div > #submit { font-size: large; }
+	div > #reset { font-size: large; }
+	div > #help { font-size: large; }
+	div > #statst { font-size: large; }
+	#text { width: 99%; margin-bottom: 0.5em; border: 1px solid purple; padding: 1px; }
+	#inputcontainer > #text { width: 100%; }
+	.framed { width: 99%; margin-bottom: 0.5em; border: 1px solid purple; display: block; }
+
+	#donate form { vertical-align: middle; }
+	#donate form input { vertical-align: middle; }
+
+	#shoutbox { display: none; border: 1px solid #000000; background-color: #ffffff; margin-top: 0.5em; }
+
+	.oz_quiz_notice { background-color: #ffffaa; border: 1px solid #ffff00; padding: 15px; margin-bottom: 15px; }
+	.oz_quiz_notice p { margin: 0; }
+</style>
+<script type="text/javascript">
+	Array.prototype.toJSONString=function(){var a=['['],b,i,l=this.length,v;function p(s){if(b){a.push(',');}
+	a.push(s);b=true;}
+	for(i=0;i<l;i+=1){v=this[i];switch(typeof v){case'undefined':case'function':case'unknown':break;case'object':if(v){if(typeof v.toJSONString==='function'){p(v.toJSONString());}}else{p("null");}
+	break;default:p(v.toJSONString());}}
+	a.push(']');return a.join('');};Boolean.prototype.toJSONString=function(){return String(this);};Date.prototype.toJSONString=function(){function f(n){return n<10?'0'+n:n;}
+	return'"'+this.getFullYear()+'-'+
+	f(this.getMonth()+1)+'-'+
+	f(this.getDate())+'T'+
+	f(this.getHours())+':'+
+	f(this.getMinutes())+':'+
+	f(this.getSeconds())+'"';};Number.prototype.toJSONString=function(){return isFinite(this)?String(this):"null";};Object.prototype.toJSONString=function(){var a=['{'],b,i,v;function p(s){if(b){a.push(',');}
+	a.push(i.toJSONString(),':',s);b=true;}
+	for(i in this){if(this.hasOwnProperty(i)){v=this[i];switch(typeof v){case'undefined':case'function':case'unknown':break;case'object':if(v){if(typeof v.toJSONString==='function'){p(v.toJSONString());}}else{p("null");}
+	break;default:p(v.toJSONString());}}}
+	a.push('}');return a.join('');};(function(s){var m={'\b':'\\b','\t':'\\t','\n':'\\n','\f':'\\f','\r':'\\r','"':'\\"','\\':'\\\\'};s.parseJSON=function(){try{if(/^("(\\.|[^"\\\n\r])*?"|[,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t])+?$/.test(this)){return eval('('+this+')');}}catch(e){}
+	throw new SyntaxError("parseJSON");};s.toJSONString=function(){if(/["\\\x00-\x1f]/.test(this)){return'"'+this.replace(/([\x00-\x1f\\"])/g,function(a,b){var c=m[b];if(c){return c;}
+	c=b.charCodeAt();return'\\u00'+
+	Math.floor(c/16).toString(16)+
+	(c%16).toString(16);})+'"';}
+	return'"'+this+'"';};})(String.prototype);
+</script>
+<script type="text/javascript">
+	function $(ele)
+	{
+	   var t = document.getElementById(ele);
+	   if(t == null) t = document.getElementsByName(ele);
+	   if(t.length == 1) t = t.item(0);
+	   return t;
+	}
+
+	function escapeHTML(str)
+	{
+	   //code portion borrowed from prototype library
+	   var div = document.createElement('div');
+	   var text = document.createTextNode(str);
+	   div.appendChild(text);
+	   return div.innerHTML;
+	   //end portion
+	}
+
+	function wordwrap(str)
+	{
+	   parts = str.split(" ");
+
+	   for(i = 0; i < parts.length; i++)
+	   {
+		  if(parts[i].length <= 30) continue;
+
+		  t = parts[i].length;
+		  p = "";
+
+		  for(var j = 0; j < (parts[i].length - 30); j += 30) p += parts[i].substring(j, j + 30) + "<wbr />";
+		  parts[i] = p + parts[i].substring(j, parts[i].length);
+	   }
+
+	   return parts.join(" ");
+	}
+
+	var elementCount = 0;
+	var arrayCount = 0;
+	var objectCount = 0;
+	var nestingLevel = 0;
+
+	function doStats()
+	{
+	   var out = "<input type='button' id='statst' onclick='showStats();' value='Show Statistics' style='float: right;' />\n"
+		+ "<div class='clear'></div>\n"
+		 + "<div id='statscon'>\n<table>\n<tr>\n<td>Number of Arrays:</td>\n<td>" + arrayCount + "</td>\n</tr>\n"
+		  + "<tr>\n<td>Number of Objects:</td>\n<td>" + objectCount + "</td>\n</tr>\n"
+		   + "<tr>\n<td>Total number of all elements:</td>\n<td>" + elementCount + "</td>\n</tr>\n"
+			+ "<tr>\n<td>Nesting depth:</td>\n<td>" + nestingLevel + "</td>\n</tr>\n"
+			 + "</table>\n</div>\n</div>\n";
+	   return out;
+	}
+
+	function parseValue(val, parent, level)
+	{
+	   elementCount++;
+	   if(parent == null) parent = "";
+	   if(level == null) level = 1;
+
+	   if(typeof(val) == "object")
+	   {
+		  if(level > nestingLevel) nestingLevel = level;
+		  if(val instanceof Array)
+		  {
+			 arrayCount++;
+			 parent = parent + (parent != "" ? " > " : "") + "Array (" + val.length + " item" + (val.length != 1 ? "s)" : ")");
+
+			 var out = "<div class='wrap'>\n<div class='array' onmouseover='doFocus(event, this);'>\n<div class='widgets'><p onclick='hideChild(this);'>[-]</p></div>\n<h3><span class='titled' title='" + parent + "'>Array</span></h3>\n";
+
+			 if(val.length > 0)
+			 {
+				out += "<table class='arraytable'>\n<tr><th>Index</th><th>Value</th></tr>\n";
+
+				for(prop in val)
+				{
+				   if(typeof(val[prop]) == "function") continue;
+				   out += "<tr><td>" + prop + "</td><td>" + parseValue(val[prop], parent, level + 1) + "</td></tr>\n";
+				}
+
+				out += "</table>\n";
+			 }
+			 else
+			 {
+
+				return "(empty <span class='titled' title='" + parent + "'>Array</span>)\n";
+			 }
+
+			 out += "</div>\n</div>\n";
+			 return out;
+		  }
+		  else
+		  {
+			 objectCount++;
+			 i = 0;
+			 for(prop in val)
+			 {
+				if(typeof(val[prop]) != "function") i++;
+			 }
+
+			 parent = parent + (parent != "" ? " > " : "") + "Object (" + i + " item" + (i != 1 ? "s)" : ")");
+
+			 var out = "<div class='wrap'>\n<div class='object' onmouseover='doFocus(event, this);'>\n<div class='widgets'><p onclick='hideChild(this);' >[ - ]</p></div>\n<h3><span class='titled' title='" + parent + "'>&nbsp;</span></h3>\n";
+
+			 if(i > 0)
+			 {
+				out += "<table class='objecttable'>\n<tr><th>Name</th><th>Value</th></tr>\n";
+				for(prop in val)
+				{
+				   if(typeof(val[prop]) == "function") continue;
+				   out += "<tr><td>" + prop + "</td><td>" + parseValue(val[prop], parent, level + 1) + "</td></tr>\n";
+				}
+
+				out += "</table><div class='clear'></div>\n";
+			 }
+			 else
+			 {
+				return "(empty <span class='titled' title='" + parent + "'>Object</span>)\n";
+			 }
+
+			 out += "</div>\n</div>\n";
+			 return out;
+		  }
+	   }
+	   else
+	   {
+		  if(typeof(val) == "string") return "<span class='string'>" + wordwrap(val.replace(/\n/g, "<br />")) + "</span>";
+		  else if(typeof(val) == "number") return "<span class='number'>" + val + "</span>";
+		  else if(typeof(val) == "boolean") return "<span class='boolean'>" + val + "</span>";
+		  else return "<span class='void'>(null)</span>";
+	   }
+	}
+
+	function parse(str)
+	{
+	   elementCount = 0;
+	   arrayCount = 0;
+	   objectCount = 0;
+
+	   var obj = null;
+	   try
+	   {
+		  obj = str.parseJSON();
+	   }
+	   catch(e)
+	   {
+		  if(e instanceof SyntaxError)
+		  {
+			 alert("There was a syntax error in your JSON string.\n" + e.message + "\nPlease check your syntax and try again.");
+			 $("text").focus();
+			 return;
+		  }
+
+		  alert("There was an unknown error. Perhaps the JSON string contained a deep level of nesting.");
+		  $("text").focus();
+		  return
+	   }
+
+	   return parseValue(obj, null, null);
+	}
+
+	function doParse()
+	{
+	   $("submit").value = "processing...";
+	   $("submit").disabled = "disabled";
+
+	   setTimeout(doParse2, 50);
+	}
+
+	function doParse2()
+	{
+	   var value = $("text").value;
+	   if(value.substr(0, 4) == "http" || value.substr(0, 4) == "file" || value.substr(0, 3) == "ftp")
+	   {
+		  getURL(value);
+	   }
+	   else
+	   {
+		  var result = parse(escapeHTML(value), null);
+		  if(result != null) $("output").innerHTML = result;
+
+		  $("stats").innerHTML = doStats();
+		  $("stats").className = "";
+
+		  $("submit").value = "json 2 html";
+		  $("submit").disabled = null;
+
+		  location.href = "#_output";
+	   }
+	}
+
+	var http = null;
+
+	function getURL(str)
+	{
+	   http.open("get", "get.php?url=" + str);
+	   http.onreadystatechange = gotURL;
+	   http.send(null);
+	}
+
+	function gotURL()
+	{
+	   if(http.readyState == 4)
+	   {
+		  var result = parse(escapeHTML(http.responseText), null);
+		  if(result != null) $("output").innerHTML = result;
+
+		  $("stats").innerHTML = doStats();
+
+		  $("submit").value = "json 2 html";
+		  $("submit").disabled = null;
+
+		  location.href = "#_output";
+	   }
+	}
+
+	function showStats()
+	{
+	   if($("statscon").style.display != "block")
+	   {
+		  $("statscon").style.display = "block";
+		  $("stats").className = "statson";
+		  $("statst").value = "Hide Statistics";
+	   }
+	   else
+	   {
+		  $("statscon").style.display = "none";
+		  $("stats").className = "";
+		  $("statst").value = "Show Statistics";
+	   }
+	}
+
+	function hideChild(ele)
+	{
+	   var src = ele.innerHTML + "";
+	   var minimizing = (src.indexOf("[ - ]") != -1);
+
+	   var nodes = ele.parentNode.parentNode.childNodes;
+	   for(i = 0; i < nodes.length; i++)
+	   {
+		  if(nodes[i].tagName == "TABLE")
+		  {
+			 nodes[i].style.display = (minimizing ? "none" : "");
+
+			 ele.parentNode.parentNode.style.paddingRight = (minimizing ? "5.0em" : "1.5em");
+			 ele.parentNode.style.right = (minimizing ? "1em" : "1.5em");
+
+			 ele.innerHTML = (minimizing ? "[ + ]" : "[ - ]");
+
+			 return;
+		  }
+	   }
+	}
+
+	var currentlyFocused = null;
+	function doFocus(event, ele)
+	{
+	   if(currentlyFocused != null) currentlyFocused.style.border = "1px solid #000000";
+	   ele.style.border = "1px solid #ffa000";
+
+	   currentlyFocused = ele;
+
+	   if(!event) event = window.event;
+	   event.cancelBubble = true;
+	   if(event.stopPropagation) event.stopPropagation();
+	}
+
+	function stopFocus()
+	{
+	   if(currentlyFocused != null) currentlyFocused.style.border = "1px solid #000000";
+	}
+
+	//code from Painfully Obvious.
+	//based on code from quirksmode.org
+	var Client = {
+	  viewportWidth: function() {
+	   return self.innerWidth || (document.documentElement.clientWidth || document.body.clientWidth);
+	  },
+
+	  viewportHeight: function() {
+		return self.innerHeight || (document.documentElement.clientHeight || document.body.clientHeight);
+	  },
+
+	  viewportSize: function() {
+		return { width: this.viewportWidth(), height: this.viewportHeight() };
+	  }
+	};
+
+	function doHelp()
+	{
+	   $("desc").style.display = "block";
+	   bodySize = Client.viewportSize();
+
+	   $("bodywrap").style.width = bodySize.width + "px";
+	   $("bodywrap").style.height = bodySize.height + "px";
+	   $("bodywrap").style.display = "block";
+	   $("bodywrap").style.opacity = "0.6";
+
+	   $("desc").style.left = ((bodySize.width / 2) - ($("desc").offsetWidth / 2)) + "px";
+	   $("desc").style.top = ((bodySize.height / 2) - ($("desc").offsetHeight / 2)) + "px";
+	   location.href = "#_top";
+	}
+
+	function hideHelp()
+	{
+	   $("desc").style.display = "none";
+	   $("bodywrap").style.display = "none";
+	   $("text").focus();
+	}
+
+	function doDonate()
+	{
+	   $("donate").style.display = "block";
+	   bodySize = Client.viewportSize();
+
+	   $("bodywrap").style.width = bodySize.width + "px";
+	   $("bodywrap").style.height = bodySize.height + "px";
+	   $("bodywrap").style.display = "block";
+	   $("bodywrap").style.opacity = "0.6";
+
+	   $("donate").style.left = ((bodySize.width / 2) - ($("donate").offsetWidth / 2)) + "px";
+	   $("donate").style.top = ((bodySize.height / 2) - ($("donate").offsetHeight / 2)) + "px";
+	   location.href = "#_top";
+	}
+
+	function hideDonate()
+	{
+		$("donate").style.display = "none";
+		$("bodywrap").style.display = "none";
+		$("text").focus();
+	}
+
+	function showShoutbox()
+	{
+	   if($("shoutbox").style.display == "" || $("shoutbox").style.display == "none")
+	   {
+		  $("shoutbox").style.display = "block";
+		  $("shoutboxlink").innerHTML = "hide shoutbox";
+	   }
+	   else
+	   {
+		  $("shoutbox").style.display = "none";
+		  $("shoutboxlink").innerHTML = "show shoutbox!";
+	   }
+	}
+
+	function clearPage()
+	{
+	   $("stats").innerHTML = "";
+	   $("output").innerHTML = "";
+	}
+
+	function load()
+	{
+	   try
+	   {
+		  http = new ActiveXObject("Microsoft.XMLHTTP");
+	   }
+	   catch(e)
+	   {
+		  try
+		  {
+			 http = new XMLHttpRequest();
+		  }
+		  catch(e)
+		  {
+		  }
+	   }
+
+	   bodySize = Client.viewportSize();
+
+	   if($("text").focus) $("text").focus();
+	}
+
+	window.onload = load;
+</script>
 </head>
 <body id="body" onmouseover="stopFocus();">
-<a name="_top" class="noa"></a>
-
-<div class="header">
-<div class="shoutboxcon"><a href="javascript:showShoutbox();" id="shoutboxlink">show shoutbox!</a>
-   <div id="shoutbox">
-      <!-- Begin Shoutbox - http://www.shoutmix.com -->
-      <iframe title="bloopletech" src="http://www.shoutmix.com/?bloopletech" width="160" height="400" frameborder="0" scrolling="auto">
-         <a href="http://www.shoutmix.com/?bloopletech">View shoutbox</a>
-      </iframe>
-      <!-- End Shoutbox -->
-   </div>
-</div>
-<img src="images/logo.png" alt="json 2 html" />
-</div>
 
 <div class="mainbody">
    <div id="bodywrap" class="bodywrap"></div>
-   <div id="desc" class="desc">
-      <p><img class="jsonlogo" src="images/json.gif" alt="JSON logo" /><h3>json</h3>
-      <i>Quoting from the home page of <a href="http://www.json.org/">JSON</a></i><br />
-      JSON (JavaScript Object Notation) is a lightweight data-interchange format. It is easy for humans to read and write. It is easy for machines to parse and generate.</p>
-      <p><h3>syntax highlighting:</h3>
-      <span class='string'>Colour for text and null values.</span><br />
-      <span class='number'>Colour for numbers.</span><br />
-      <span class='boolean'>Colour for true and false values.</span><br />
-      <span class='void'>Colour for void values.</span><br />
-      <img class="ex" src="images/object.png" /> Background for Objects.<br />
-      <img class="ex" src="images/array.png" /> Background for Arrays.<br />
-      <img class="ex" src="images/objectt.png" /> Background for Object name/value pair tables.<br />
-      <img class="ex" src="images/arrayt.png" /> Background for Array value tables.</p>
-      <p><h3>dependencies</h3>
-      This page uses the JSON JavaScript <a href="http://www.json.org/js.html">parsing library</a>.</p>
-      <p><h3>note</h3>
-      Words longer than 30 characters may be broken into two or more lines to save space.</p>
-      <p class="closep"><input type="button" onclick="hideHelp();" value="close" /></p>
-   </div>
 
    <form onsubmit="doParse(); return false;">
-      <p class="mast mast_first">This page offers an easy way to visualize a string of JSON text.
-      Put some JSON into the text area, and this page will instantly display the text as a set of nested boxes,
-      corresponding to the objects, arrays and values in the JSON string.<br />
-      You can also paste a URL into the textarea, and the JSON string will be loaded from the URL.</p>
-      </p>
-      <p class="mast">
-        JSON 2 HTML is open source and released under the MIT license - <a href="http://github.com/bloopletech/json2html/tree/master">get the source on github</a>. Patches / improvements are welcomed!
-      </p>
       <div id="inputcontainer"><textarea id="text" rows="12"></textarea></div>
       <div class="clear"></div>
       <div class="lfloat"><input type="submit" id="submit" value="json 2 html" onclick="doParse(); return false;" /> <input type="button" id="reset" value="reset" onclick="clearPage();" /></div>
-      <div class="rfloat"><input type="button" id="help" value="help" onclick="doHelp();" /></div>
       <div class="clear"></div>
       <hr />
       <a name="_output" class="noa"></a>
-      <div id="stats" class="stats"></div>
       <div id="output" class="output"></div>
    </form>
-   <div class="footer">Check out my portfolio at <a href="http://i.bloople.net">i.bloople.net</a>. &copy; Brenton Fletcher. Comments? e-mail me: <a href="mailto:i@bloople.net">i@bloople.net</a>.</div>
 </body>
 </html>
